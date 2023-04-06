@@ -7,6 +7,7 @@ endif()
 
 # Dependencies
 
+find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(ament_cmake REQUIRED)
 
@@ -16,7 +17,7 @@ include_directories(include)
 add_library(ximea_driver SHARED src/ximea_driver.cpp)
 target_link_libraries(ximea_driver m3api)
 ament_target_dependencies(ximea_driver
-  sensor_msgs
+  sensor_msgs rclcpp
 )
 
 add_executable(ximea_driver_node src/ximea_driver_node.cpp)

@@ -5,10 +5,11 @@
 #include "m3api/xiApi.h"
 
 #include "sensor_msgs/msg/image.hpp"
+#include "rclcpp/rclcpp.hpp"
 
 namespace trailbot {
 
-class XIMEADriver {
+class XIMEADriver : public rclcpp::Node {
 public:
   XIMEADriver();
 
@@ -16,6 +17,8 @@ public:
 
 private:
   HANDLE xi_handle_;
+
+  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr pub_;
 };
 
 }

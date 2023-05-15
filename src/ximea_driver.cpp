@@ -18,7 +18,6 @@ XIMEADriver::XIMEADriver() : Node("ximea_driver") {
   stat = xiSetParamInt(xi_handle_, XI_PRM_IMAGE_DATA_FORMAT, XI_MONO8);
 
   stat = xiSetParamInt(xi_handle_, XI_PRM_EXPOSURE, kExposureUs);
-  // stat = xiSetParamInt(xi_handle_, XI_PRM_AEAG, XI_ON);
 
   stat = xiStartAcquisition(xi_handle_);
 

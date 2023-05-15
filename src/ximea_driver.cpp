@@ -6,6 +6,8 @@ namespace trailbot {
 
 constexpr int kTimeoutMs = 100;
 
+// Fixed exposure time
+// TODO(jacob): Make these parameters
 constexpr int kExposureMs = 50;
 constexpr int kExposureUs = kExposureMs * 1000;
 

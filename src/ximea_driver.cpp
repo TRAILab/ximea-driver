@@ -6,20 +6,50 @@ namespace trailbot {
 
 constexpr int kTimeoutMs = 100;
 
-// Fixed exposure time
-// TODO(jacob): Make these parameters
-constexpr int kExposureMs = 50;
-constexpr int kExposureUs = kExposureMs * 1000;
-
 XIMEADriver::XIMEADriver() : Node("ximea_driver") {
-  pub_ = create_publisher<sensor_msgs::msg::Image>("camera", 10);
+  this->declare_parameter<bool>("auto_exposure", true);
+  this->declare_parameter<int>("exposure_time_ms", 50);
+  this->declare_parameter<int>("max_exposure_time_ms", 50);
+  this->declare_parameter<float>("gain_db", 0);
+  this->declare_parameter<int>("target_brightness", 0);
+  this->declare_parameter<float>("gamma_y", 0);
+}
+
+void XIMEADriver::Run() {
+  it_ = std::make_unique<image_transport::ImageTransport>(this->shared_from_this());
+  pub_ = it_->advertise("camera", 10);
 
   auto stat = xiOpenDevice(0, &xi_handle_);
+
+  if (stat != XI_OK) {
+    RCLCPP_ERROR(get_logger(), "Failed to open camera");
+  }
 
   stat = xiSetParamInt(xi_handle_, XI_PRM_BUFFER_POLICY, XI_BP_SAFE);
   stat = xiSetParamInt(xi_handle_, XI_PRM_IMAGE_DATA_FORMAT, XI_MONO8);
 
-  stat = xiSetParamInt(xi_handle_, XI_PRM_EXPOSURE, kExposureUs);
+  const bool auto_exposure = this->get_parameter("auto_exposure").as_bool();
+
+  if (auto_exposure) {
+    stat = xiSetParamInt(xi_handle_, XI_PRM_AEAG, XI_ON);
+    stat = xiSetParamFloat(xi_handle_, XI_PRM_EXP_PRIORITY, 0.5);
+
+    const auto max_exposure_time_us = this->get_parameter("max_exposure_time_ms").as_int() * 1000;
+    stat = xiSetParamInt(xi_handle_, XI_PRM_AE_MAX_LIMIT, max_exposure_time_us);
+
+    const auto target_brightness = this->get_parameter("target_brightness").as_int();
+    stat = xiSetParamInt(xi_handle_, XI_PRM_AEAG_LEVEL, target_brightness);
+  } else {
+    stat = xiSetParamInt(xi_handle_, XI_PRM_AEAG, XI_OFF);
+    const auto exposure_time_us = this->get_parameter("exposure_time_ms").as_int() * 1000;
+    stat = xiSetParamInt(xi_handle_, XI_PRM_EXPOSURE, exposure_time_us);
+    stat = xiSetParamFloat(xi_handle_, XI_PRM_GAIN, this->get_parameter("gain_db").as_double());
+  }
+
+  stat = xiSetParamFloat(xi_handle_, XI_PRM_GAMMAY, this->get_parameter("gamma_y").as_double());
+
+  stat = xiSetParamInt(xi_handle_, XI_PRM_HORIZONTAL_FLIP, XI_ON);
+  stat = xiSetParamInt(xi_handle_, XI_PRM_VERTICAL_FLIP, XI_ON);
 
   stat = xiStartAcquisition(xi_handle_);
 
@@ -28,7 +58,7 @@ XIMEADriver::XIMEADriver() : Node("ximea_driver") {
   while(rclcpp::ok()) {
     auto img = GetImage();
     if (img != nullptr) {
-      pub_->publish(std::move(img));
+      pub_.publish(std::move(img));
     }
   }
 }

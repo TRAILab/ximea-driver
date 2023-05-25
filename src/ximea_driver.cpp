@@ -76,6 +76,8 @@ std::unique_ptr<sensor_msgs::msg::Image> XIMEADriver::GetImage() {
 
   auto image = std::make_unique<sensor_msgs::msg::Image>();
 
+  image->header.stamp = this->now();
+
   image->height = xi_image.height;
   image->width = xi_image.width;
 

@@ -26,12 +26,15 @@ void XIMEADriver::Run() {
   }
 
   stat = xiSetParamInt(xi_handle_, XI_PRM_BUFFER_POLICY, XI_BP_SAFE);
-  stat = xiSetParamInt(xi_handle_, XI_PRM_IMAGE_DATA_FORMAT, XI_MONO8);
+  stat = xiSetParamInt(xi_handle_, XI_PRM_IMAGE_DATA_FORMAT, XI_RGB24);
 
   const bool auto_exposure = this->get_parameter("auto_exposure").as_bool();
 
   if (auto_exposure) {
+    // Auto exposure on
     stat = xiSetParamInt(xi_handle_, XI_PRM_AEAG, XI_ON);
+
+    // Equal priority to exposure time/gain
     stat = xiSetParamFloat(xi_handle_, XI_PRM_EXP_PRIORITY, 0.5);
 
     const auto max_exposure_time_us = this->get_parameter("max_exposure_time_ms").as_int() * 1000;
@@ -40,14 +43,18 @@ void XIMEADriver::Run() {
     const auto target_brightness = this->get_parameter("target_brightness").as_int();
     stat = xiSetParamInt(xi_handle_, XI_PRM_AEAG_LEVEL, target_brightness);
   } else {
+    // Auto exposure off
     stat = xiSetParamInt(xi_handle_, XI_PRM_AEAG, XI_OFF);
+
     const auto exposure_time_us = this->get_parameter("exposure_time_ms").as_int() * 1000;
     stat = xiSetParamInt(xi_handle_, XI_PRM_EXPOSURE, exposure_time_us);
+
     stat = xiSetParamFloat(xi_handle_, XI_PRM_GAIN, this->get_parameter("gain_db").as_double());
   }
 
   stat = xiSetParamFloat(xi_handle_, XI_PRM_GAMMAY, this->get_parameter("gamma_y").as_double());
 
+  // Rotate the image 180 degrees because the camera is upside down
   stat = xiSetParamInt(xi_handle_, XI_PRM_HORIZONTAL_FLIP, XI_ON);
   stat = xiSetParamInt(xi_handle_, XI_PRM_VERTICAL_FLIP, XI_ON);
 
@@ -81,7 +88,7 @@ std::unique_ptr<sensor_msgs::msg::Image> XIMEADriver::GetImage() {
   image->height = xi_image.height;
   image->width = xi_image.width;
 
-  image->encoding = sensor_msgs::image_encodings::MONO8;
+  image->encoding = sensor_msgs::image_encodings::RGB8;
 
   const uint8_t bytes_per_pixel = xi_image.bp_size / (xi_image.height * xi_image.width);
   image->step = bytes_per_pixel * xi_image.width;

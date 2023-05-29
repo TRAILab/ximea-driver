@@ -1,0 +1,8 @@
+ximea_driver_node:
+  ros__parameters:
+    auto_exposure: false
+    exposure_time_ms: 100
+    gain_db: 6.0
+    max_exposure_time_ms: 75
+    target_brightness: 20
+    gamma_y: 0.5

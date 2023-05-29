@@ -12,5 +12,5 @@ Build driver:
 
 Run driver:
 ```
-ros2 run ximea_driver ximea_driver_node
+ros2 launch ximea_driver ximea_driver.launch.py
 ```

@@ -21,8 +21,9 @@ void XIMEADriver::Run() {
 
   auto stat = xiOpenDevice(0, &xi_handle_);
 
-  if (stat != XI_OK) {
+  if (stat != XI_OK || xi_handle_ == nullptr) {
     RCLCPP_ERROR(get_logger(), "Failed to open camera");
+    return;
   }
 
   stat = xiSetParamInt(xi_handle_, XI_PRM_BUFFER_POLICY, XI_BP_SAFE);
@@ -88,7 +89,7 @@ std::unique_ptr<sensor_msgs::msg::Image> XIMEADriver::GetImage() {
   image->height = xi_image.height;
   image->width = xi_image.width;
 
-  image->encoding = sensor_msgs::image_encodings::RGB8;
+  image->encoding = sensor_msgs::image_encodings::BGR8;
 
   const uint8_t bytes_per_pixel = xi_image.bp_size / (xi_image.height * xi_image.width);
   image->step = bytes_per_pixel * xi_image.width;

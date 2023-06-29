@@ -1,6 +1,6 @@
 ximea_driver_node:
   ros__parameters:
-    auto_exposure: false
+    auto_exposure: true
     exposure_time_ms: 100
     gain_db: 6.0
     max_exposure_time_ms: 75

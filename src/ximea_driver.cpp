@@ -69,6 +69,9 @@ void XIMEADriver::Run() {
       pub_.publish(std::move(img));
     }
   }
+
+  stat = xiStopAcquisition(xi_handle_);
+  stat = xiCloseDevice(xi_handle_);
 }
 
 std::unique_ptr<sensor_msgs::msg::Image> XIMEADriver::GetImage() {

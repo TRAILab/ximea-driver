@@ -10,6 +10,7 @@ endif()
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(ament_cmake REQUIRED)
+find_package(image_transport REQUIRED)
 
 # Targets
 
@@ -17,7 +18,7 @@ include_directories(include)
 add_library(ximea_driver SHARED src/ximea_driver.cpp)
 target_link_libraries(ximea_driver m3api)
 ament_target_dependencies(ximea_driver
-  sensor_msgs rclcpp
+  sensor_msgs rclcpp image_transport
 )
 
 add_executable(ximea_driver_node src/ximea_driver_node.cpp)
@@ -41,5 +42,8 @@ if(BUILD_TESTING)
   )
   ament_lint_auto_find_test_dependencies()
 endif()
+
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 ament_package()
